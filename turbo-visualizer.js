@@ -181,6 +181,73 @@ document.onload = (function(d3){
   var selectionBroker = null;
   let resizer = new Resizer(panesUpdatedCallback, 100);
 
+  function renderTurbolizerData(txtRes) {
+    // If the JSON isn't properly terminated, assume compiler crashed and
+    // add best-guess empty termination
+    if (txtRes[txtRes.length-2] == ',') {
+      txtRes += '{"name":"disassembly","type":"disassembly","data":""}]}';
+    }
+    try{
+      jsonObj = JSON.parse(txtRes);
+
+      hideCurrentPhase();
+
+      selectionBroker.setNodePositionMap(jsonObj.nodePositions);
+
+      sourceView.initializeCode(jsonObj.source, jsonObj.sourcePosition);
+      disassemblyView.initializeCode(jsonObj.source);
+
+      var selectMenu = document.getElementById('display-selector');
+      var disassemblyPhase = null;
+      selectMenu.innerHTML = '';
+      for (var i = 0; i < jsonObj.phases.length; ++i) {
+        var optionElement = document.createElement("option");
+        optionElement.text = jsonObj.phases[i].name;
+        if (optionElement.text == 'disassembly') {
+          disassemblyPhase = jsonObj.phases[i];
+        } else {
+          selectMenu.add(optionElement, null);
+        }
+      }
+
+      disassemblyView.initializePerfProfile(jsonObj.eventCounts);
+      disassemblyView.show(disassemblyPhase.data, null);
+
+      var initialPhaseIndex = +window.sessionStorage.getItem("lastSelectedPhase");
+      if (!(initialPhaseIndex in jsonObj.phases)) {
+        initialPhaseIndex = 0;
+      }
+
+      // We wish to show the remembered phase {lastSelectedPhase}, but
+      // this will crash if the first view we switch to is a
+      // ScheduleView. So we first switch to the first phase, which
+      // should never be a ScheduleView.
+      displayPhase(jsonObj.phases[0]);
+      displayPhase(jsonObj.phases[initialPhaseIndex]);
+      selectMenu.selectedIndex = initialPhaseIndex;
+
+      selectMenu.onchange = function(item) {
+        window.sessionStorage.setItem("lastSelectedPhase", selectMenu.selectedIndex);
+        displayPhase(jsonObj.phases[selectMenu.selectedIndex]);
+      }
+
+      fitPanesToParents();
+
+      d3.select("#search-input").attr("value", window.sessionStorage.getItem("lastSearch") || "");
+
+    }
+    catch(err) {
+      window.console.log("caught exception, clearing session storage just in case");
+      window.sessionStorage.clear(); // just in case
+      window.console.log("showing error");
+      window.alert("Invalid TurboFan JSON file\n" +
+                    "error: " + err.message);
+      return;
+    }
+  }
+
+  window.renderTurbolizerData = renderTurbolizerData
+
   function panesUpdatedCallback() {
     graph.fitGraphViewToWindow();
   }
@@ -232,68 +299,7 @@ document.onload = (function(d3){
         var consts = Node.consts;
         filereader.onload = function(){
           var txtRes = filereader.result;
-          // If the JSON isn't properly terminated, assume compiler crashed and
-          // add best-guess empty termination
-          if (txtRes[txtRes.length-2] == ',') {
-            txtRes += '{"name":"disassembly","type":"disassembly","data":""}]}';
-          }
-          try{
-            jsonObj = JSON.parse(txtRes);
-
-            hideCurrentPhase();
-
-            selectionBroker.setNodePositionMap(jsonObj.nodePositions);
-
-            sourceView.initializeCode(jsonObj.source, jsonObj.sourcePosition);
-            disassemblyView.initializeCode(jsonObj.source);
-
-            var selectMenu = document.getElementById('display-selector');
-            var disassemblyPhase = null;
-            selectMenu.innerHTML = '';
-            for (var i = 0; i < jsonObj.phases.length; ++i) {
-              var optionElement = document.createElement("option");
-              optionElement.text = jsonObj.phases[i].name;
-              if (optionElement.text == 'disassembly') {
-                disassemblyPhase = jsonObj.phases[i];
-              } else {
-                selectMenu.add(optionElement, null);
-              }
-            }
-
-            disassemblyView.initializePerfProfile(jsonObj.eventCounts);
-            disassemblyView.show(disassemblyPhase.data, null);
-
-            var initialPhaseIndex = +window.sessionStorage.getItem("lastSelectedPhase");
-            if (!(initialPhaseIndex in jsonObj.phases)) {
-              initialPhaseIndex = 0;
-            }
-
-            // We wish to show the remembered phase {lastSelectedPhase}, but
-            // this will crash if the first view we switch to is a
-            // ScheduleView. So we first switch to the first phase, which
-            // should never be a ScheduleView.
-            displayPhase(jsonObj.phases[0]);
-            displayPhase(jsonObj.phases[initialPhaseIndex]);
-            selectMenu.selectedIndex = initialPhaseIndex;
-
-            selectMenu.onchange = function(item) {
-              window.sessionStorage.setItem("lastSelectedPhase", selectMenu.selectedIndex);
-              displayPhase(jsonObj.phases[selectMenu.selectedIndex]);
-            }
-
-            fitPanesToParents();
-
-            d3.select("#search-input").attr("value", window.sessionStorage.getItem("lastSearch") || "");
-
-          }
-          catch(err) {
-            window.console.log("caught exception, clearing session storage just in case");
-            window.sessionStorage.clear(); // just in case
-            window.console.log("showing error");
-            window.alert("Invalid TurboFan JSON file\n" +
-                         "error: " + err.message);
-            return;
-          }
+          renderTurbolizerData(txtRes);
         };
         filereader.readAsText(uploadFile);
       } else {
