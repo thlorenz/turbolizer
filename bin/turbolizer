@@ -1,0 +1,46 @@
+#!/usr/bin/env node
+'use strict'
+
+const { prompt } = require('promptly')
+const { mapAllTurboFiles } = require('../lib/turbolizer')
+const { createServer, openWithFile } = require('../lib/turbolizer.server')
+
+function createPromptMsg(map) {
+  let msg = 'Turbolizer - please select a file to view:\n\n'
+  for (const [ selector, { entry } ] of map) {
+    msg += `\t${selector}:  ${entry}\n`
+  }
+  msg += '\t0:  View ALL'
+  return msg + '\n\nYour choice: '
+}
+
+function createValidator(map) {
+  return val => {
+    if (val === '0') return val
+    if (map.has(val)) return val
+    throw new Error(`Invalid choice: '${val}', please select one of the given numbers`)
+  }
+}
+
+const root = process.cwd()
+;(async () => {
+  try {
+    const map = await mapAllTurboFiles(root)
+    const msg = createPromptMsg(map)
+    const result = await prompt(msg, { validator: createValidator(map) })
+    const { server, address } = createServer(root)
+
+    server.on('listening', () => {
+      const choice = result.trim()
+      if (choice === '0') {
+        for (const val of map.values()) {
+          openWithFile({ address, file: val.entry })
+        }
+      } else {
+        openWithFile({ address, file: map.get(choice).entry })
+      }
+    })
+  } catch (err) {
+    console.error(err)
+  }
+})()

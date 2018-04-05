@@ -1,0 +1,32 @@
+{
+  "name": "turbolizer",
+  "version": "0.0.0",
+  "description": "Turbolizer tool from the v8 repository with added support to preload a profile",
+  "main": "lib/turbolizer.js",
+  "bin": "bin/turbolizer",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/thlorenz/turbolizer.git"
+  },
+  "homepage": "https://github.com/thlorenz/turbolizer",
+  "dependencies": {
+    "connect": "~3.6.6",
+    "ecstatic": "~3.2.0",
+    "opener": "~1.4.3",
+    "promptly": "~3.0.3"
+  },
+  "devDependencies": {},
+  "keywords": [],
+  "author": {
+    "name": "Thorsten Lorenz",
+    "email": "thlorenz@gmx.de",
+    "url": "http://thlorenz.com"
+  },
+  "license": {
+    "type": "MIT",
+    "url": "https://github.com/thlorenz/turbolizer/blob/master/LICENSE"
+  },
+  "engine": {
+    "node": ">=8"
+  }
+}
