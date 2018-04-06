@@ -26,6 +26,13 @@ const root = process.cwd()
 ;(async () => {
   try {
     const map = await mapAllTurboFiles(root)
+    if (map.size === 0) {
+      console.error('Turbolizer - Problem:\n')
+      console.error('  Unable to find any "turbo-*.json" files in the current directory.\n')
+      console.error('  Please run "node --trace-turbo app.js" in order to create them or follow the')
+      console.error('  instructions at https://github.com/thlorenz/turbolizer/blob/master/README.md.')
+      return
+    }
     const msg = createPromptMsg(map)
     const result = await prompt(msg, { validator: createValidator(map) })
     const { server, address } = createServer(root)
