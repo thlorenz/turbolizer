@@ -1,3 +1,31 @@
+# Turbolizer
+
+Turbolizer tool derived from the one included with `v8/tools`.
+
+![turbolizer](./assets/turbolizer.gif)
+
+## Installation
+
+```
+npm install -g turbolizer
+```
+
+## Usage
+
+Run your app with the `--trace-turbo` flag, i.e. `node --trace-turbo app.js` to produce `turbo-*.json` files.
+
+Then just run `turbolizer` in the same directory and select which file (or all) you want to
+load and the turbolizer application will open in the browser with it preloaded.
+
+## Alternatives
+
+If you don't want to install anything, as an alternative can then either load them one by one
+via the hosted browser version of this repo at [thlorenz.github.io/turbolizer](https://thlorenz.github.io/turbolizer).
+
+* * *
+
+_Original Readme from the [v8 repository](https://github.com/v8/v8)_
+
 Turbolizer
 ==========
 
