@@ -164,7 +164,7 @@ class DisassemblyView extends TextView {
     // Comment lines for line 0 include sourcePosition already, only need to
     // add sourcePosition for lines > 0.
     view.pos_lines[0] = sourcePosition;
-    if (sourceText != "") {
+    if (sourceText) {
       let base = sourcePosition;
       let current = 0;
       let source_lines = sourceText.split("\n");

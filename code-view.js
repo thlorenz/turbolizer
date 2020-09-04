@@ -126,7 +126,7 @@ class CodeView extends View {
     codePre.classList.add("prettyprint");
     view.divNode.innerHTML = "";
     view.divNode.appendChild(codePre);
-    if (sourceText != "") {
+    if (sourceText) {
       codePre.classList.add("linenums");
       codePre.textContent = sourceText;
       try {
