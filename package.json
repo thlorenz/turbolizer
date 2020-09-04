@@ -1,6 +1,6 @@
 {
   "name": "turbolizer",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "Turbolizer tool from the v8 repository with added support to preload a profile",
   "main": "lib/turbolizer.js",
   "bin": "bin/turbolizer",
